@@ -46,3 +46,4 @@ ultralytics==8.3.173
 ultralytics-thop==2.0.14
 urllib3==2.5.0
 Werkzeug==3.1.3
+opencv-python
