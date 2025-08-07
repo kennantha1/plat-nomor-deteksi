@@ -1,0 +1,22 @@
+Laporan yang Lebih Baik: Menyimpan screenshot dari plat nomor yang cocok ke dalam sebuah folder sebagai bukti visual, selain mencatatnya di database.
+
+Meningkatkan Akurasi Deteksi Plat Nomor:
+Seperti yang sudah dibahas sebelumnya, metode pemotongan gambar di bagian bawah frame itu sangat dasar. Untuk hasil yang lebih baik, kita bisa mencoba pendekatan yang lebih canggih.
+
+Menggunakan deteksi kontur: Metode ini akan mencari bentuk-bentuk persegi panjang di dalam gambar, lalu menganalisis mana yang paling mirip dengan plat nomor.
+
+Menggunakan model machine learning: Ini adalah cara paling akurat. Kamu bisa menggunakan model yang sudah dilatih, seperti Haar Cascade untuk plat nomor atau model modern seperti YOLO dan SSD.
+
+Menambahkan Fitur Notifikasi:
+Saat ini, notifikasi hanya muncul di konsol (Command Prompt). Kita bisa membuat notifikasi yang lebih terlihat.
+
+Notifikasi Pop-up: Tampilkan jendela kecil yang berisi pesan saat plat nomor yang cocok ditemukan. Pustaka seperti tkinter atau PyQt bisa digunakan untuk ini.
+
+Notifikasi Suara: Putar suara peringatan saat ada kecocokan. Pustaka seperti playsound sangat cocok untuk tugas ini.
+
+Manajemen Data dan Laporan:
+Sistemmu sudah mencatat plat yang cocok ke database SQLite. Kita bisa membuat ini lebih berguna.
+
+Antarmuka Laporan: Buat antarmuka sederhana (misalnya, di Command Prompt atau jendela GUI) untuk melihat semua plat nomor yang cocok, lengkap dengan waktu dan tanggalnya.
+
+Penyimpanan Gambar: Simpan screenshot dari plat nomor yang cocok ke folder di komputer. Ini bisa menjadi bukti visual.

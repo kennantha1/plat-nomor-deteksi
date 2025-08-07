@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+*.db
+captured_plates/
+runs/
+Plat Nomor.v2i.yolov8.zip
+alert.wav
+playsound-1.2.2-py2.py3-none-any.whl
+Indonesian ANPR dataset/
+Indonesian_ANPR_dataset/

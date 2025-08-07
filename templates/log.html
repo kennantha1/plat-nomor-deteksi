@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Log Deteksi Plat Nomor</title>
+    <!-- Google Fonts - Inter for modern sans-serif look -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+    />
+    <!-- Datatables CSS -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css"
+    />
+    <!-- Date Picker CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <style>
+      :root {
+        --bg-light-content: #ffffff; /* Main content background color */
+        --text-dark-content: #212529; /* Dark text color for main content */
+
+        /* Sidebar colors (from index.html dark theme) */
+        --bg-dark: rgb(
+          18,
+          18,
+          18
+        ); /* Main background color (for body/overall) */
+        --sidebar-dark: rgb(26, 26, 26); /* Sidebar background color */
+        --text-light: #e0e0e0; /* Light gray text color for sidebar */
+        --accent-pink: #fe2c55; /* Accent color for buttons/active states */
+        --hover-gray: #333333; /* Darker gray for hover effects */
+        --success-green: #28a745; /* Green for Start button */
+        --danger-red: #dc3545; /* Red for Stop button */
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        background-color: var(
+          --bg-dark
+        ); /* Overall body background (behind sidebar) */
+        color: var(
+          --text-dark-content
+        ); /* Default text color for main content */
+      }
+      .d-flex {
+        min-height: 100vh; /* Ensure full viewport height */
+      }
+      /* Sidebar styles - remain dark */
+      .sidebar {
+        background-color: var(--sidebar-dark);
+        color: var(--text-light);
+        padding: 20px;
+        min-height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 250px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .sidebar-header {
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 20px;
+      }
+      .sidebar .nav-link {
+        color: var(--text-light);
+        padding: 12px 15px;
+        margin-bottom: 8px;
+        border-radius: 8px;
+        transition: background-color 0.2s ease, color 0.2s ease;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+      }
+      .sidebar .nav-link i {
+        margin-right: 12px;
+        font-size: 1.1em;
+      }
+      .sidebar .nav-link:hover {
+        background-color: var(--hover-gray);
+        color: #ffffff;
+      }
+      .sidebar .nav-link.active {
+        background-color: var(--accent-pink);
+        color: #ffffff;
+        font-weight: 600;
+      }
+      /* Removed specific styles for Start/Stop buttons as they are removed */
+      .sidebar .nav-link.disabled-button {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background-color: var(--hover-gray) !important;
+        color: #999999 !important;
+      }
+
+      /* Main content area - now light */
+      .main-content {
+        margin-left: 250px;
+        padding: 20px;
+        flex-grow: 1;
+        background-color: var(
+          --bg-light-content
+        ); /* White background for content */
+        color: var(--text-dark-content); /* Dark text for content */
+      }
+      .display-4 {
+        color: var(--text-dark-content); /* Dark color for main titles */
+        font-weight: 700;
+        margin-bottom: 30px;
+      }
+      .card {
+        background-color: var(
+          --bg-light-content
+        ); /* Card background matches content */
+        border: 1px solid #dee2e6; /* Light border for cards */
+        color: var(--text-dark-content);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Lighter shadow */
+      }
+      .card-header {
+        background-color: #f8f9fa; /* Lighter header for cards */
+        border-bottom: 1px solid #dee2e6;
+        color: var(--text-dark-content);
+      }
+      .table {
+        color: var(--text-dark-content); /* Table text color */
+      }
+      .table thead th {
+        border-bottom: 2px solid #adb5bd; /* Darker border for table header */
+        color: var(--text-dark-content);
+      }
+      .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #f2f2f2; /* Light stripe effect */
+      }
+      .table-hover tbody tr:hover {
+        background-color: #e9ecef; /* Lighter hover effect for table rows */
+      }
+      /* Datatables specific styling to match light theme */
+      .dataTables_wrapper .dataTables_length,
+      .dataTables_wrapper .dataTables_filter,
+      .dataTables_wrapper .dataTables_info,
+      .dataTables_wrapper .dataTables_processing,
+      .dataTables_wrapper .dataTables_paginate {
+        color: var(--text-dark-content);
+      }
+      .dataTables_wrapper .dataTables_paginate .paginate_button {
+        color: var(--text-dark-content) !important;
+        border: 1px solid #ced4da !important;
+        background-color: #f8f9fa !important;
+        border-radius: 5px;
+        margin: 0 3px;
+      }
+      .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+      .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+        background-color: var(--accent-pink) !important;
+        color: #ffffff !important;
+        border-color: var(--accent-pink) !important;
+      }
+      .dataTables_wrapper
+        .dataTables_paginate
+        .paginate_button:hover:not(.current) {
+        background-color: #e9ecef !important;
+        color: var(--text-dark-content) !important;
+      }
+      .dataTables_wrapper .dataTables_filter input,
+      .dataTables_wrapper .dataTables_length select {
+        background-color: #ffffff !important;
+        color: var(--text-dark-content) !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 5px;
+        padding: 5px 10px;
+      }
+      .form-control {
+        background-color: #ffffff; /* Light input background */
+        color: var(--text-dark-content);
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+      }
+      .form-control:focus {
+        background-color: #ffffff;
+        color: var(--text-dark-content);
+        border-color: var(--accent-pink);
+        box-shadow: 0 0 0 0.2rem rgba(254, 44, 85, 0.25);
+      }
+      .btn-info {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+      }
+      .btn-info:hover {
+        background-color: #138496;
+        border-color: #117a8b;
+      }
+      .btn-danger {
+        background-color: var(--danger-red);
+        border-color: var(--danger-red);
+      }
+      .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+      }
+      .badge-success {
+        background-color: var(--success-green);
+        color: #ffffff;
+      }
+      .badge-info {
+        background-color: #17a2b8;
+        color: #ffffff;
+      }
+      .modal-content {
+        background-color: var(--bg-light-content); /* Modal content light */
+        color: var(--text-dark-content);
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+      }
+      .modal-header {
+        border-bottom: 1px solid #dee2e6;
+        background-color: #f8f9fa;
+        color: var(--text-dark-content);
+      }
+      .modal-footer {
+        border-top: 1px solid #dee2e6;
+      }
+      .close {
+        color: var(--text-dark-content); /* Dark close button */
+        text-shadow: none;
+      }
+      .close:hover {
+        color: #6c757d;
+      }
+      .alert-danger {
+        background-color: rgba(220, 53, 69, 0.1);
+        color: var(--danger-red);
+        border-color: var(--danger-red);
+      }
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .sidebar {
+          position: relative;
+          width: 100%;
+          min-height: auto;
+          margin-bottom: 20px;
+          padding-bottom: 0;
+        }
+        .main-content {
+          margin-left: 0;
+        }
+        .sidebar .nav-link {
+          margin-bottom: 5px;
+        }
+        .btn-action {
+          margin-bottom: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="d-flex">
+      <!-- Sidebar -->
+      <div class="sidebar shadow-lg">
+        <div>
+          <div class="sidebar-header text-center">
+            <h3 class="mb-0">Sistem ANPR</h3>
+            <small class="text-muted">Deteksi Plat Nomor</small>
+          </div>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link" href="/"
+                ><i class="fas fa-video"></i> Halaman Scan</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="/logs"
+                ><i class="fas fa-history"></i> Riwayat Log</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/manage_targets"
+                ><i class="fas fa-bullseye"></i> Manajemen Plat Target</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" id="openScreenshotsFolderBtn"
+                ><i class="fas fa-folder-open"></i> Buka Folder Screenshot</a
+              >
+            </li>
+            <!-- Removed "Mulai Scan" and "Hentikan Scan" buttons -->
+          </ul>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content flex-grow-1">
+        <div class="container">
+          <div class="row">
+            <div class="col-12 text-center mb-4">
+              <h1 class="display-4">Riwayat Deteksi Plat Nomor</h1>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card shadow-sm">
+                <div class="card-header">
+                  <h5 class="card-title mb-0">Filter dan Aksi</h5>
+                </div>
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-4 mb-3">
+                      <div class="input-group">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text"
+                            ><i class="fas fa-calendar-alt"></i
+                          ></span>
+                        </div>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="datePicker"
+                          placeholder="Pilih Tanggal"
+                        />
+                        <div class="input-group-append">
+                          <button
+                            class="btn btn-outline-secondary"
+                            type="button"
+                            id="clearDateFilter"
+                          >
+                            Hapus
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-md-8 text-right">
+                      <button id="selectAllBtn" class="btn btn-info btn-action">
+                        <i class="fas fa-check-double"></i> Pilih Semua
+                      </button>
+                      <button
+                        id="deleteSelectedBtn"
+                        class="btn btn-danger btn-action"
+                        disabled
+                      >
+                        <i class="fas fa-trash-alt"></i> Hapus yang Dipilih
+                      </button>
+                      <!-- Added "Buka Folder Screenshot" button here -->
+                      <button
+                        class="btn btn-secondary btn-action"
+                        id="openScreenshotsFolderBtnContent"
+                      >
+                        <i class="fas fa-folder-open"></i> Buka Folder
+                        Screenshot
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card shadow-sm">
+                <div class="card-header">
+                  <h5 class="card-title mb-0">Daftar Log Deteksi</h5>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table
+                      id="logTable"
+                      class="table table-striped table-hover"
+                    >
+                      <thead>
+                        <tr>
+                          <th><input type="checkbox" id="masterCheckbox" /></th>
+                          <th>Tanggal & Waktu</th>
+                          <th>Plat Nomor</th>
+                          <th>Wilayah</th>
+                          <th>Status</th>
+                          <th>Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <!-- Data log will be loaded here using AJAX/Flask -->
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal untuk menampilkan screenshot -->
+    <div
+      class="modal fade"
+      id="screenshotModal"
+      tabindex="-1"
+      aria-labelledby="screenshotModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="screenshotModalLabel">
+              Screenshot Plat Nomor
+            </h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body text-center">
+            <img
+              id="screenshotImage"
+              src=""
+              class="img-fluid"
+              alt="Screenshot Plat Nomor"
+            />
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- jQuery, Popper.js, dan Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Datatables JS -->
+    <script
+      type="text/javascript"
+      charset="utf8"
+      src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"
+    ></script>
+    <!-- Date Picker JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+      var logData = []; // Global variable to store log data
+
+      $(document).ready(function () {
+        // Inisialisasi Date Picker
+        const datePicker = flatpickr("#datePicker", {
+          dateFormat: "Y-m-d",
+          onChange: function (selectedDates, dateStr, instance) {
+            // Filter tabel berdasarkan tanggal yang dipilih
+            logTable.columns(1).search(dateStr).draw();
+          },
+        });
+
+        $("#clearDateFilter").on("click", function () {
+          datePicker.clear();
+          logTable.columns(1).search("").draw();
+        });
+
+        // Mapping plate code prefixes to region names
+        const wilayahMapping = {
+          A: "Banten",
+          B: "DKI Jakarta",
+          D: "Jawa Barat (Bandung)",
+          E: "Cirebon",
+          F: "Bogor",
+          G: "Jawa Tengah (Pekalongan, Tegal)",
+          H: "Jawa Tengah (Semarang)",
+          K: "Jawa Tengah (Pati)",
+          L: "Jawa Timur (Surabaya)",
+          M: "Madura",
+          N: "Jawa Timur (Malang)",
+          P: "Jawa Timur (Besuki)",
+          R: "Jawa Tengah (Banyumas)",
+          S: "Jawa Timur (Bojonegoro)",
+          T: "Jawa Barat (Purwakarta)",
+          W: "Jawa Timur (Sidoarjo)",
+          Z: "Jawa Barat (Garut)",
+          AA: "Jawa Tengah (Kedu)",
+          AB: "DI Yogyakarta",
+          AD: "Jawa Tengah (Solo)",
+          AE: "Jawa Timur (Madiun)",
+          AG: "Jawa Timur (Kediri)",
+          BA: "Sumatera Barat",
+          BB: "Sumatera Utara",
+          BD: "Bengkulu",
+          BE: "Lampung",
+          BG: "Sumatera Selatan",
+          BH: "Jambi",
+          BK: "Sumatera Utara",
+          BL: "Aceh",
+          BM: "Riau",
+          BN: "Kep. Bangka Belitung",
+          BP: "Kep. Riau",
+          CC: "Corpo",
+          DA: "Kalimantan Selatan",
+          DB: "Sulawesi Utara",
+          DD: "Sulawesi Selatan",
+          DE: "Maluku",
+          DG: "Maluku Utara",
+          DH: "Nusa Tenggara Timur",
+          DK: "Bali",
+          DL: "Sulawesi Utara",
+          DM: "Gorontalo",
+          DN: "Sulawesi Tengah",
+          DR: "Nusa Tenggara Barat",
+          DS: "Papua",
+          DT: "Sulawesi Tenggara",
+          DU: "Gorontalo",
+          DW: "Papua Barat",
+          EA: "Nusa Tenggara Barat",
+          EB: "Maluku",
+          ED: "Maluku",
+          KB: "Kalimantan Barat",
+          KT: "Kalimantan Timur",
+          KU: "Kalimantan Utara",
+          PA: "Papua",
+          // Add more mappings as needed
+        };
+
+        // Fungsi untuk mengambil data log dari server
+        function fetchLogData() {
+          $.ajax({
+            url: "/get_logs", // Endpoint baru di Flask
+            method: "GET",
+            success: function (data) {
+              logData = data;
+              updateTable(logData);
+            },
+            error: function (error) {
+              console.log("Error fetching log data:", error);
+            },
+          });
+        }
+
+        // Fungsi untuk meng-update tabel dengan data baru
+        function updateTable(data) {
+          logTable.clear().draw();
+          let rowData = data.map(function (log) {
+            const platPrefix = log.plat_nomor.split(" ")[0].toUpperCase();
+            const wilayah = wilayahMapping[platPrefix] || "Tidak Diketahui";
+            const status = log.is_target
+              ? '<span class="badge badge-success">Target</span>'
+              : '<span class="badge badge-info">Terdeteksi</span>';
+
+            let row = [
+              `<input type="checkbox" class="row-checkbox" data-id="${log.id}">`,
+              log.timestamp,
+              log.plat_nomor,
+              wilayah,
+              status,
+              `<button class="btn btn-sm btn-info view-screenshot-btn" data-screenshot-path="${
+                log.screenshot_path
+              }" ${
+                log.screenshot_path ? "" : "disabled"
+              }><i class="fas fa-image"></i> Lihat</button>`,
+            ];
+            return row;
+          });
+          logTable.rows.add(rowData).draw();
+        }
+
+        // Inisialisasi DataTables
+        const logTable = $("#logTable").DataTable({
+          order: [[1, "desc"]], // Urutkan berdasarkan kolom waktu secara default
+          pageLength: 10,
+          language: {
+            url: "https://cdn.datatables.net/plug-ins/1.10.22/i18n/Indonesian.json",
+          },
+        });
+
+        // Event listener untuk tombol "Pilih Semua"
+        $("#selectAllBtn").on("click", function () {
+          const allChecked = $("#masterCheckbox").prop("checked");
+          $(".row-checkbox").prop("checked", !allChecked);
+          $("#masterCheckbox").prop("checked", !allChecked);
+          toggleDeleteButton();
+        });
+
+        // Event listener untuk master checkbox
+        $("#masterCheckbox").on("change", function () {
+          $(".row-checkbox").prop("checked", this.checked);
+          toggleDeleteButton();
+        });
+
+        // Event listener untuk checkbox baris
+        $("#logTable tbody").on("change", ".row-checkbox", function () {
+          toggleDeleteButton();
+        });
+
+        // Fungsi untuk mengaktifkan/menonaktifkan tombol hapus
+        function toggleDeleteButton() {
+          const anyChecked = $(".row-checkbox:checked").length > 0;
+          $("#deleteSelectedBtn").prop("disabled", !anyChecked);
+        }
+
+        // Event listener untuk tombol "Lihat Screenshot"
+        $("#logTable tbody").on("click", ".view-screenshot-btn", function () {
+          const screenshotPath = $(this).data("screenshot-path");
+          if (screenshotPath) {
+            $("#screenshotImage").attr("src", "/" + screenshotPath);
+            $("#screenshotModal").modal("show");
+          }
+        });
+
+        // Event listener untuk tombol "Hapus yang Dipilih"
+        $("#deleteSelectedBtn").on("click", function () {
+          const selectedIds = [];
+          $(".row-checkbox:checked").each(function () {
+            selectedIds.push($(this).data("id"));
+          });
+
+          if (
+            selectedIds.length > 0 &&
+            confirm(
+              "Apakah Anda yakin ingin menghapus " +
+                selectedIds.length +
+                " log ini?"
+            )
+          ) {
+            $.ajax({
+              url: "/delete_logs", // Endpoint baru di Flask
+              method: "POST",
+              contentType: "application/json",
+              data: JSON.stringify({ ids: selectedIds }),
+              success: function (response) {
+                alert(response.message);
+                fetchLogData(); // Muat ulang data setelah penghapusan
+              },
+              error: function (xhr) {
+                const errorMsg = xhr.responseJSON
+                  ? xhr.responseJSON.message
+                  : "Terjadi kesalahan.";
+                alert("Gagal menghapus log: " + errorMsg);
+                console.log("Error deleting logs:", xhr.responseText);
+              },
+            });
+          }
+        });
+
+        // Muat data saat halaman pertama kali dimuat
+        fetchLogData();
+
+        // Sidebar navigation active state (manual for now, could be dynamic with Flask context)
+        const currentPath = window.location.pathname;
+        $(".sidebar .nav-link").removeClass("active");
+        if (currentPath === "/logs") {
+          $('.sidebar .nav-link[href="/logs"]').addClass("active");
+        } else if (currentPath === "/") {
+          $('.sidebar .nav-link[href="/"]').addClass("active");
+        } else if (currentPath === "/manage_targets") {
+          $('.sidebar .nav-link[href="/manage_targets"]').addClass("active");
+        }
+
+        // Handle "Buka Folder Screenshot" button in sidebar (if it exists)
+        $("#openScreenshotsFolderBtn").on("click", function (e) {
+          e.preventDefault();
+          $.get("/open_screenshots_folder", function (data) {
+            alert(data);
+          }).fail(function (xhr) {
+            alert("Error: " + xhr.responseText);
+          });
+        });
+
+        // Handle "Buka Folder Screenshot" button in content area
+        $("#openScreenshotsFolderBtnContent").on("click", function (e) {
+          e.preventDefault();
+          $.get("/open_screenshots_folder", function (data) {
+            alert(data);
+          }).fail(function (xhr) {
+            alert("Error: " + xhr.responseText);
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

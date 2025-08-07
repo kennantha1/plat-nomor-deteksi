@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistem Deteksi Plat Nomor</title>
+    <!-- Google Fonts - Inter for modern sans-serif look -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <!-- Font Awesome for icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+    />
+    <style>
+      :root {
+        --bg-dark: rgb(18, 18, 18); /* Main background color */
+        --sidebar-dark: rgb(26, 26, 26); /* Sidebar background color */
+        --text-light: #e0e0e0; /* Light gray text color */
+        --accent-pink: #fe2c55; /* Accent color for buttons/active states */
+        --hover-gray: #333333; /* Darker gray for hover effects */
+        --success-green: #28a745; /* Green for Start button */
+        --danger-red: #dc3545; /* Red for Stop button */
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        background-color: var(--bg-dark); /* Apply dark background */
+        color: var(--text-light); /* Light text color */
+      }
+      .d-flex {
+        min-height: 100vh; /* Ensure full viewport height */
+      }
+      .sidebar {
+        background-color: var(
+          --sidebar-dark
+        ); /* Darker background for sidebar */
+        color: var(--text-light);
+        padding: 20px;
+        min-height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 250px;
+        overflow-y: auto;
+        display: flex; /* Use flexbox for sidebar content */
+        flex-direction: column; /* Arrange items vertically */
+        justify-content: space-between; /* Push bottom items to the bottom */
+        border-right: 1px solid rgba(255, 255, 255, 0.05); /* Subtle border */
+      }
+      .sidebar-header {
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 20px;
+      }
+      .sidebar .nav-link {
+        color: var(--text-light);
+        padding: 12px 15px; /* Increased padding for better touch targets */
+        margin-bottom: 8px; /* More spacing between items */
+        border-radius: 8px; /* Rounded corners for buttons */
+        transition: background-color 0.2s ease, color 0.2s ease;
+        display: flex; /* Align icon and text */
+        align-items: center;
+        font-weight: 500; /* Medium font weight */
+      }
+      .sidebar .nav-link i {
+        margin-right: 12px; /* Space between icon and text */
+        font-size: 1.1em; /* Slightly larger icons */
+      }
+      .sidebar .nav-link:hover {
+        background-color: var(--hover-gray); /* Darker on hover */
+        color: #ffffff; /* White text on hover */
+      }
+      .sidebar .nav-link.active {
+        background-color: var(--accent-pink); /* Accent color for active link */
+        color: #ffffff; /* White text for active link */
+        font-weight: 600; /* Bolder font for active link */
+      }
+      /* Specific styles for the toggle scan button */
+      .sidebar .nav-link.toggle-scan-button {
+        background-color: var(--success-green); /* Default to green (Start) */
+        color: #ffffff;
+        font-weight: 600;
+      }
+      .sidebar .nav-link.toggle-scan-button.scanning {
+        background-color: var(--danger-red); /* Red when scanning (Stop) */
+      }
+      .sidebar .nav-link.toggle-scan-button:hover:not(.disabled-button) {
+        /* Hover effect depends on current state */
+        background-color: var(--success-green); /* Default to green (Start) */
+        filter: brightness(0.9); /* Slightly darker */
+      }
+      .sidebar
+        .nav-link.toggle-scan-button.scanning:hover:not(.disabled-button) {
+        background-color: var(--danger-red); /* Red when scanning (Stop) */
+        filter: brightness(0.9); /* Slightly darker */
+      }
+
+      .sidebar .nav-link.disabled-button {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background-color: var(
+          --hover-gray
+        ) !important; /* Override hover for disabled */
+        color: #999999 !important; /* Gray out text */
+      }
+
+      .main-content {
+        margin-left: 250px;
+        padding: 20px;
+        flex-grow: 1; /* Allow main content to take remaining space */
+      }
+      .display-4 {
+        color: #ffffff; /* White color for main titles */
+        font-weight: 700; /* Bold title */
+        margin-bottom: 30px;
+      }
+      .form-group label {
+        color: var(--text-light); /* Light color for labels */
+      }
+      .form-control {
+        background-color: #333333; /* Darker input background */
+        color: var(--text-light);
+        border: 1px solid #555555;
+        border-radius: 8px; /* Rounded input fields */
+      }
+      .form-control:focus {
+        background-color: #444444;
+        color: #ffffff;
+        border-color: var(--accent-pink);
+        box-shadow: 0 0 0 0.2rem rgba(254, 44, 85, 0.25); /* Accent shadow on focus */
+      }
+      .video-container {
+        border: 2px solid #333333; /* Darker border */
+        border-radius: 12px; /* More rounded corners for video */
+        overflow: hidden;
+        background-color: #000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 480px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Deeper shadow */
+      }
+      .video-feed {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .sidebar {
+          position: relative;
+          width: 100%;
+          min-height: auto;
+          margin-bottom: 20px;
+          padding-bottom: 0; /* Remove bottom padding for small screens */
+        }
+        .main-content {
+          margin-left: 0;
+        }
+        .sidebar .nav-link {
+          margin-bottom: 5px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="d-flex">
+      <!-- Sidebar -->
+      <div class="sidebar shadow-lg">
+        <div>
+          <div class="sidebar-header text-center">
+            <h3 class="mb-0">Sistem ANPR</h3>
+            <small class="text-muted">Deteksi Plat Nomor</small>
+          </div>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link active" href="/"
+                ><i class="fas fa-video"></i> Halaman Scan</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/logs"
+                ><i class="fas fa-history"></i> Riwayat Log</a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/manage_targets"
+                ><i class="fas fa-bullseye"></i> Manajemen Plat Target</a
+              >
+            </li>
+            <!-- Removed "Buka Folder Screenshot" button -->
+            <li class="nav-item mt-4">
+              <!-- Added margin-top for separation -->
+              <a
+                class="nav-link toggle-scan-button disabled-button"
+                href="#"
+                id="toggleScanBtn"
+              >
+                <i class="fas fa-play"></i>
+                <span id="toggleScanText">Mulai Scan</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="main-content flex-grow-1">
+        <div class="container">
+          <div class="row">
+            <div class="col-12 text-center mb-4">
+              <h1 class="display-4">Sistem Deteksi Plat Nomor Kendaraan</h1>
+            </div>
+          </div>
+
+          <div class="row mb-4">
+            <div class="col-md-8 offset-md-2 col-lg-6 offset-lg-3">
+              <div class="form-group">
+                <label for="cameraSelect">Pilih Kamera:</label>
+                <select class="form-control" id="cameraSelect">
+                  <!-- Camera options will be loaded here by JavaScript -->
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12">
+              <div class="video-container">
+                <!-- Placeholder image for video feed -->
+                <img
+                  src="https://placehold.co/1280x720/333333/E0E0E0?text=Memuat+Daftar+Kamera..."
+                  class="video-feed"
+                  id="videoFeed"
+                  alt="Video Feed"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- jQuery, Popper.js, dan Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+      let currentCameraIndex = null; // To keep track of the currently selected camera
+      let isScanning = false; // To track the current scan status
+
+      $(document).ready(function () {
+        // Fetch available cameras and populate the dropdown
+        $.get("/get_cameras", function (data) {
+          const cameraSelect = $("#cameraSelect");
+          cameraSelect.empty(); // Clear existing options
+          if (data.length > 0) {
+            data.forEach(function (cameraName, index) {
+              cameraSelect.append(
+                $("<option>", {
+                  value: index,
+                  text: cameraName,
+                })
+              );
+            });
+            // Set the default selected camera
+            currentCameraIndex = cameraSelect.val();
+            $("#toggleScanBtn").removeClass("disabled-button"); // Enable toggle button if cameras are found
+            $("#videoFeed").attr(
+              "src",
+              "https://placehold.co/1280x720/333333/E0E0E0?text=Pilih+Kamera+dan+Mulai+Scan"
+            );
+          } else {
+            cameraSelect.append(
+              $("<option>", {
+                value: "",
+                text: "Tidak ada kamera ditemukan",
+                disabled: true,
+              })
+            );
+            $("#videoFeed").attr(
+              "src",
+              "https://placehold.co/1280x720/FF0000/FFFFFF?text=Tidak+Ada+Kamera+Ditemukan"
+            );
+            $("#toggleScanBtn").addClass("disabled-button"); // Disable toggle button if no cameras
+          }
+        }).fail(function () {
+          // Handle error in fetching cameras
+          const cameraSelect = $("#cameraSelect");
+          cameraSelect.empty();
+          cameraSelect.append(
+            $("<option>", {
+              value: "",
+              text: "Gagal memuat kamera",
+              disabled: true,
+            })
+          );
+          $("#videoFeed").attr(
+            "src",
+            "https://placehold.co/1280x720/FF0000/FFFFFF?text=Gagal+Memuat+Kamera"
+          );
+          $("#toggleScanBtn").addClass("disabled-button");
+        });
+
+        // Event listener for camera selection change
+        $("#cameraSelect").change(function () {
+          // If a scan is active, stop it before switching camera
+          if (isScanning) {
+            stopVideoFeed();
+          }
+          currentCameraIndex = $(this).val();
+          // Re-enable toggle button if a camera is selected and not already scanning
+          if (
+            currentCameraIndex !== null &&
+            currentCameraIndex !== undefined &&
+            currentCameraIndex !== ""
+          ) {
+            $("#toggleScanBtn").removeClass("disabled-button");
+            $("#videoFeed").attr(
+              "src",
+              "https://placehold.co/1280x720/333333/E0E0E0?text=Pilih+Kamera+dan+Mulai+Scan"
+            );
+          } else {
+            $("#toggleScanBtn").addClass("disabled-button");
+            $("#videoFeed").attr(
+              "src",
+              "https://placehold.co/1280x720/FF0000/FFFFFF?text=Tidak+Ada+Kamera+Ditemukan"
+            );
+          }
+        });
+
+        // Function to toggle the video feed (Start/Stop)
+        $("#toggleScanBtn").on("click", function (e) {
+          e.preventDefault();
+          if ($(this).hasClass("disabled-button")) return; // Do nothing if disabled
+
+          if (isScanning) {
+            stopVideoFeed();
+          } else {
+            startVideoFeed();
+          }
+        });
+
+        function startVideoFeed() {
+          if (
+            currentCameraIndex !== null &&
+            currentCameraIndex !== undefined &&
+            currentCameraIndex !== ""
+          ) {
+            $("#videoFeed").attr("src", "/video_feed/" + currentCameraIndex);
+            isScanning = true;
+            $("#toggleScanBtn").addClass("scanning");
+            $("#toggleScanBtn i")
+              .removeClass("fas fa-play")
+              .addClass("fas fa-stop");
+            $("#toggleScanText").text("Hentikan Scan");
+          } else {
+            alert("Pilih kamera terlebih dahulu.");
+          }
+        }
+
+        function stopVideoFeed() {
+          $("#videoFeed").attr(
+            "src",
+            "https://placehold.co/1280x720/000000/FFFFFF?text=Scan+Dihentikan"
+          );
+          isScanning = false;
+          $("#toggleScanBtn").removeClass("scanning");
+          $("#toggleScanBtn i")
+            .removeClass("fas fa-stop")
+            .addClass("fas fa-play");
+          $("#toggleScanText").text("Mulai Scan");
+
+          // Send AJAX request to backend to stop the camera stream
+          if (
+            currentCameraIndex !== null &&
+            currentCameraIndex !== undefined &&
+            currentCameraIndex !== ""
+          ) {
+            $.post("/stop_video_feed/" + currentCameraIndex)
+              .done(function (response) {
+                console.log(response.message);
+              })
+              .fail(function (xhr) {
+                console.error("Error stopping video feed:", xhr.responseText);
+              });
+          }
+        }
+        // Sidebar navigation active state (manual for now, could be dynamic with Flask context)
+        const currentPath = window.location.pathname;
+        $(".sidebar .nav-link").removeClass("active");
+        if (currentPath === "/logs") {
+          $('.sidebar .nav-link[href="/logs"]').addClass("active");
+        } else if (currentPath === "/") {
+          $('.sidebar .nav-link[href="/"]').addClass("active");
+        } else if (currentPath === "/manage_targets") {
+          $('.sidebar .nav-link[href="/manage_targets"]').addClass("active");
+        }
+      });
+    </script>
+  </body>
+</html>

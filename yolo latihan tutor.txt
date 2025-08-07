@@ -1,0 +1,8 @@
+Rencana Perubahan
+Fine-tuning Model (Opsional tetapi Sangat Direkomendasikan): Cara terbaik adalah melatih model YOLO dengan dataset gambar plat nomor Indonesia. Ini akan menghasilkan model khusus yang sangat akurat untuk tugas ini. Proses ini memerlukan pengumpulan dataset, pemberian label, dan pelatihan model menggunakan framework seperti Ultralytics YOLOv8. Ini adalah upaya yang lebih besar tetapi memberikan hasil terbaik.
+
+Menggunakan Kelas Objek Spesifik (Jika Model Dilatih): Jika model YOLO yang Anda gunakan dilatih dengan kelas khusus untuk "plat nomor", kita dapat memfilter hasil deteksi hanya untuk kelas tersebut.
+
+Filter Berdasarkan Rasio Aspek dan Ukuran: Kita dapat menambahkan logika post-processing untuk memfilter hasil deteksi berdasarkan rasio aspek (perbandingan lebar dan tinggi) dan ukuran objek yang terdeteksi. Plat nomor memiliki rasio aspek yang khas (lebih lebar daripada tinggi) dan ukuran minimum tertentu agar teksnya dapat dibaca.
+
+Karena melatih model dari awal atau menemukan model YOLO yang sudah dilatih khusus untuk plat nomor Indonesia mungkin memerlukan waktu dan sumber daya, kita akan fokus pada opsi ke-3 terlebih dahulu, yaitu menambahkan filter berdasarkan rasio aspek dan ukuran. Ini adalah cara yang lebih cepat untuk meningkatkan fokus deteksi.
